@@ -14,9 +14,8 @@ void Graph::addEdge(int u, int v, int weight) {
     if (adj_.find(u) == adj_.end()) adj_[u] = {};
     if (adj_.find(v) == adj_.end()) adj_[v] = {};
  
-    // avoid duplicate edges
+    //make sure no dupes
     for (auto& e : adj_[u]) if (e.to == v) return;
- 
     adj_[u].push_back({v, weight, false});
     adj_[v].push_back({u, weight, false});
 }
@@ -60,7 +59,7 @@ bool Graph::isConnected(int u, int v) const {
     std::queue<int> q;
     q.push(u);
     visited.insert(u);
- 
+ //traversal ohh yeah
     while (!q.empty()) {
         int cur = q.front(); q.pop();
         auto it = adj_.find(cur);
@@ -113,19 +112,16 @@ int Graph::shortestPath(int src, int dst) const {
 std::vector<int> Graph::shortestPathNodes(int src, int dst) const {
     if (!hasNode(src) || !hasNode(dst)) return {};
     if (src == dst) return {src};
- 
     const int INF = std::numeric_limits<int>::max();
     std::unordered_map<int, int> dist;
     std::unordered_map<int, int> prev;
     for (auto& [id, _] : adj_) { dist[id] = INF; prev[id] = -1; }
     dist[src] = 0;
- 
     std::priority_queue<std::pair<int,int>,
                         std::vector<std::pair<int,int>>,
                         std::greater<>> pq;
     pq.push({0, src});
- 
-    while (!pq.empty()) {
+     while (!pq.empty()) {
         auto [d, u] = pq.top(); pq.pop();
         if (d > dist[u]) continue;
         auto it = adj_.find(u);
@@ -140,9 +136,7 @@ std::vector<int> Graph::shortestPathNodes(int src, int dst) const {
             }
         }
     }
- 
     if (!dist.count(dst) || dist.at(dst) == INF) return {};
- 
     std::vector<int> path;
     for (int cur = dst; cur != -1; cur = prev[cur])
         path.push_back(cur);
