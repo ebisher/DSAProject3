@@ -10,49 +10,49 @@
 struct Edge {
     int to;
     int weight;
-    bool closed; // soft-delete
+    bool closed;
 };
  
 class Graph {
 public:
-    // Add a location node with its name
+    //Adding a location node
     void addNode(int id, const std::string& name);
  
-    // Add an undirected edge between two nodes
+    //Add an undir edge
     void addEdge(int u, int v, int weight);
  
-    // Toggle edge closure (soft delete). Returns false if edge DNE.
+    //Edge closure
     bool toggleEdge(int u, int v);
  
-    // Check edge status: "open", "closed", "DNE"
+    //Check edge status
     std::string checkEdgeStatus(int u, int v) const;
  
-    // Check if two nodes are connected using only open edges (BFS/DFS)
+    //Check if two nodes are connected using only open edges
     bool isConnected(int u, int v) const;
  
-    // Dijkstra: shortest path using only open edges. Returns -1 if unreachable.
+    //Dijkstra
     int shortestPath(int src, int dst) const;
  
-    // Dijkstra returning the full path (node list). Empty if unreachable.
+    // Dijkstra returning the full path but e if unreachable
     std::vector<int> shortestPathNodes(int src, int dst) const;
  
-    // Node exists?
+    //check existence of node
     bool hasNode(int id) const;
  
-    // Get node name
+    //getter for node name
     std::string nodeName(int id) const;
  
-    // Get all neighbour edges for a node
+    //All neighbour edges for node
     const std::vector<Edge>& neighbours(int id) const;
  
-    // All node ids
+    //All node ids
     std::vector<int> allNodes() const;
  
 private:
     std::unordered_map<int, std::string> nodeNames_;
     std::unordered_map<int, std::vector<Edge>> adj_;
  
-    // Helper: find edge iterator
+    //Find the edge iterator
     Edge* findEdge(int u, int v);
     const Edge* findEdge(int u, int v) const;
 };
