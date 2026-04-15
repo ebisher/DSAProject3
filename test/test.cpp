@@ -2,7 +2,9 @@
 #include <iostream>
 
 // change if you choose to use a different header name
-#include "CampusCompass.h"
+#include "main.cpp"
+#include "graphs.h"
+#include "students.h"
 
 using namespace std;
 
