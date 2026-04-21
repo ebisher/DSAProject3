@@ -8,12 +8,12 @@
 // The CATCH_TESTING define suppresses the duplicate main() in main.cpp.
 // ─────────────────────────────────────────────────────────────────────────────
  
-#define CATCH_TESTING
+#define CATCH_CONFIG_MAIN
 #include "catch/catch_amalgamated.hpp"
 #include <iostream>
-#include "src/graph.h"
-#include "src/student.h"
-#include "src/campusCompass.h"
+#include "../src/graph.h"
+#include "../src/student.h"
+#include "../src/campusCompass.h"
 using namespace std;
  
 // ─── Helper that builds a loaded CampusCompass ────────────────────────────────────
