@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include "campusCompass.h"
-
 int main() {
     CampusCompass cc;
 
@@ -15,13 +14,11 @@ int main() {
     for (int i = 0; i < numCommands; ++i) {
         std::string line;
         std::getline(std::cin, line);
-
         if (line.empty()) {
             --i;
             continue;
         }
-
-        cc.processLine(line);
+        std::cout << cc.processLine(line) << '\n';
     }
 
     return 0;

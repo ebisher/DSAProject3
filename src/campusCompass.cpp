@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <cctype>
 
-//trim helper
+//trim helper---------
 static std::string trim(const std::string& s) {
     size_t start = 0;
     while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) start++;
@@ -19,7 +19,7 @@ static std::string trim(const std::string& s) {
     return s.substr(start, end - start);
 }
 
-//validation helprs
+//validation helprs----------------
 bool CampusCompass::validId(const std::string& id) const {
     if (id.size() != 8) return false;
     return std::all_of(id.begin(), id.end(), ::isdigit);
@@ -177,7 +177,7 @@ void CampusCompass::loadClasses(const std::string& path) {
     std::cerr << "Loaded classes: " << count << '\n';
 }
 
-//-----ACTUAL METHODS
+//ACTUAL METHODS-----------------------------
 void CampusCompass::cmdInsert(std::istringstream& ss) {
     std::string name, id;
     int residenceLocId, n;
@@ -259,11 +259,9 @@ void CampusCompass::cmdRemoveClass(std::istringstream& ss) {
             }
         }
     }
-
     for (const auto& id : toErase) {
         students.erase(id);
     }
-
     if (count == 0) {
         std::cout << "unsuccessful";
     } else {

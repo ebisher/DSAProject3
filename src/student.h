@@ -4,7 +4,7 @@
  
 struct Student {
     std::string name;
-    std::string id;       // 8-digit string
+    std::string id;       // 8digit string
     int residenceLocId;
-    std::set<std::string> classes; // class codes
+    std::set<std::string> classes; //class codes
 };

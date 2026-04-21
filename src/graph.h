@@ -21,10 +21,10 @@ public:
     //Add an undir edge
     void addEdge(int u, int v, int weight);
  
-    //Edge closure
+    //Edge close
     bool toggleEdge(int u, int v);
  
-    //Check edge status
+    //Check edge
     std::string checkEdgeStatus(int u, int v) const;
  
     //Check if two nodes are connected using only open edges
@@ -33,7 +33,7 @@ public:
     //Dijkstra
     int shortestPath(int src, int dst) const;
  
-    // Dijkstra returning the full path but e if unreachable
+    // Dijkstra  e if unreachable
     std::vector<int> shortestPathNodes(int src, int dst) const;
  
     //check existence of node
@@ -52,7 +52,7 @@ private:
     std::unordered_map<int, std::string> nodeNames_;
     std::unordered_map<int, std::vector<Edge>> adj_;
  
-    //Find the edge iterator
+    //edge iter
     Edge* findEdge(int u, int v);
     const Edge* findEdge(int u, int v) const;
 };

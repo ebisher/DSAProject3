@@ -85,7 +85,7 @@ int Graph::shortestPath(int src, int dst) const {
     for (auto& [id, _] : adj_) dist[id] = INF;
     dist[src] = 0;
  
-    // min-heap: (dist, node)
+    //minheap of dist and node
     std::priority_queue<std::pair<int,int>,
                         std::vector<std::pair<int,int>>,
                         std::greater<>> pq;
