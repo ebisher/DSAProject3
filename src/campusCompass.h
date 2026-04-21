@@ -44,7 +44,9 @@ public:
     void cmdPrintStudentZone(std::istringstream& ss);
     void cmdVerifySchedule(std::istringstream& ss);
 
-    void processCommand(const std::string& line);
+    std::string processLine(const std::string& line);
+    std::string processCommand(const std::string& line);
+    std::string parseInput(const std::string& input);  //needed for last test
 
     const std::unordered_map<std::string, Student>& getStudents() const { return students; }
     const Graph& getGraph() const { return g; }

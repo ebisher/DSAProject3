@@ -9,11 +9,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
  
 #define CATCH_TESTING
-#include <catch2/catch_test_macros.hpp>
+#include "catch/catch_amalgamated.hpp"
 #include <iostream>
-#include "main.cpp"
-#include "graphs.h"
-#include "students.h"
+#include "src/graph.h"
+#include "src/student.h"
+#include "src/campusCompass.h"
 using namespace std;
  
 // ─── Helper that builds a loaded CampusCompass ────────────────────────────────────
@@ -96,10 +96,10 @@ TEST_CASE("Edge case of dupe student ID rejected on second insert", "[edge]") {
 TEST_CASE("Edge case so dropClass on last class autoremoves student", "[edge]") {
     CampusCompass cc = makeCC();
     cc.processLine(R"(insert "Jake Schnada" 01010101 1 1 COP3530)");
-    REQUIRE(cc.students.count("01010101") == 1);
+    REQUIRE(cc.getStudents().count("01010101") == 1);
     //Drop only class so student should be erased automatically
     cc.processLine("dropClass 01010101 COP3530");
-    REQUIRE(cc.students.count("01010101") == 0);
+    REQUIRE(cc.getStudents().count("01010101") == 0);
 }
  
 TEST_CASE("Edge case so removeClass with no students enrolled returns unsuccessful", "[edge]") {
@@ -124,9 +124,9 @@ TEST_CASE("dropClass - successfully drops one of multiple classes", "[commands]"
     string result = cc.processLine("dropClass 12345678 COP3530");
     REQUIRE(result == "successful");
     //student still exists wit one class
-    REQUIRE(cc.students.count("12345678") == 1);
-    REQUIRE(cc.students.at("12345678").classes.count("COP3530") == 0);
-    REQUIRE(cc.students.at("12345678").classes.count("MAC2311") == 1);
+    REQUIRE(cc.getStudents().count("12345678") == 1);
+    REQUIRE(cc.getStudents().at("12345678").classes.count("COP3530") == 0);
+    REQUIRE(cc.getStudents().at("12345678").classes.count("MAC2311") == 1);
 }
  
 TEST_CASE("dropClass fails when student doesnt have the class", "[commands]") {
@@ -145,12 +145,12 @@ TEST_CASE("removeClass drops class from all enrolled students and returns count"
     string result = cc.processLine("removeClass COP3530");
     REQUIRE(result == "2");
     //Amber had only COP3530 → auto-removed
-    REQUIRE(cc.students.count("10000001") == 0);
+    REQUIRE(cc.getStudents().count("10000001") == 0);
     //Nicole still exists with MAC2311
-    REQUIRE(cc.students.count("10000002") == 1);
-    REQUIRE(cc.students.at("10000002").classes.count("COP3530") == 0);
+    REQUIRE(cc.getStudents().count("10000002") == 1);
+    REQUIRE(cc.getStudents().at("10000002").classes.count("COP3530") == 0);
     //Corena unaffected
-    REQUIRE(cc.students.count("10000003") == 1);
+    REQUIRE(cc.getStudents().count("10000003") == 1);
 }
  
 TEST_CASE("remove successfully removes an existing student", "[commands]") {
@@ -158,7 +158,7 @@ TEST_CASE("remove successfully removes an existing student", "[commands]") {
     cc.processLine(R"(insert "Sydney" 12345678 1 1 COP3530)");
     string result = cc.processLine("remove 12345678");
     REQUIRE(result == "successful");
-    REQUIRE(cc.students.count("12345678") == 0);
+    REQUIRE(cc.getStudents().count("12345678") == 0);
 }
  
 TEST_CASE("remove fails for non-existent student", "[commands]") {
@@ -172,8 +172,8 @@ TEST_CASE("replaceClass successfully swaps one class for another", "[commands]")
     cc.processLine(R"(insert "Meghan" 12345678 1 1 COP3530)");
     string result = cc.processLine("replaceClass 12345678 COP3530 MAC2311");
     REQUIRE(result == "successful");
-    REQUIRE(cc.students.at("12345678").classes.count("COP3530") == 0);
-    REQUIRE(cc.students.at("12345678").classes.count("MAC2311") == 1);
+    REQUIRE(cc.getStudents().at("12345678").classes.count("COP3530") == 0);
+    REQUIRE(cc.getStudents().at("12345678").classes.count("MAC2311") == 1);
 }
  
 TEST_CASE("replaceClass fails when old class not in schedule", "[commands]") {
@@ -200,7 +200,7 @@ TEST_CASE("printShortestEdges reachable then unreachable after closing bridges",
  
     //Before closing
     string before = cc.processLine("printShortestEdges 99991111");
-    // The time should be a positive integer (path exists)
+    // The time should be a positive integer bc path exists
     REQUIRE(before.find("EEL3701: -1") == string::npos);
     REQUIRE(before.find("EEL3701:") != string::npos);
  
@@ -218,7 +218,7 @@ TEST_CASE("printShortestEdges reachable then unreachable after closing bridges",
 }
  
 
-//5. END-TO-END parse Inputoutput match
+//5. ENDTOEND PARSE MATCH
 
 TEST_CASE("End-to-end parseInput matches expected output", "[e2e]") {
     CampusCompass cc = makeCC();
