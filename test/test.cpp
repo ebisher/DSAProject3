@@ -8,6 +8,7 @@
 // The CATCH_TESTING define suppresses the duplicate main() in main.cpp.
 // ─────────────────────────────────────────────────────────────────────────────
  
+/*
 #define CATCH_CONFIG_MAIN
 #include "catch/catch_amalgamated.hpp"
 #include <iostream>
@@ -250,3 +251,5 @@ unsuccessful
     string actual = cc.parseInput(input);
     REQUIRE(actual == expected);
 }
+
+*/

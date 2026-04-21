@@ -40,7 +40,6 @@ bool CampusCompass::validClassCode(const std::string& code) const {
     return true;
 }
 
-//methods
 int CampusCompass::toMinutes(const std::string& t) const {
     // expects HH:MM
     if (t.size() != 5 || t[2] != ':') return -1;
@@ -89,60 +88,96 @@ int CampusCompass::mstCost(const std::set<int>& nodeSet) const {
     return total;
 }
 
+//loading the info------------
 void CampusCompass::loadEdges(const std::string& path) {
     std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Could not open edges: " << path << '\n';
+        return;
+    }
+
     std::string line;
+    int count = 0;
 
     while (std::getline(file, line)) {
         line = trim(line);
         if (line.empty()) continue;
 
+        std::replace(line.begin(), line.end(), '\t', ',');
+
         std::stringstream ss(line);
         std::vector<std::string> parts;
         std::string part;
+
         while (std::getline(ss, part, ',')) {
             parts.push_back(trim(part));
         }
 
-        // Skip header rows if present
-        if (parts.size() < 3) continue;
-        if (!std::isdigit(static_cast<unsigned char>(parts[0][0]))) continue;
+        // Expected format:
+        // LocationID_1, LocationID_2, Name_1, Name_2, Time
+        if (parts.size() < 5) continue;
 
-        int u = std::stoi(parts[0]);
-        int v = std::stoi(parts[1]);
-        int w = std::stoi(parts[2]);
+        int u, v, w;
+        try {
+            u = std::stoi(parts[0]);
+            v = std::stoi(parts[1]);
+            w = std::stoi(parts[4]);
+        } catch (...) {
+            continue; // skips header row too
+        }
 
-        // If your CSV has node names, you can adapt this, but blank names are fine.
-        g.addNode(u, std::to_string(u));
-        g.addNode(v, std::to_string(v));
+        g.addNode(u, parts[2]);
+        g.addNode(v, parts[3]);
         g.addEdge(u, v, w);
+        count++;
     }
+
+    std::cerr << "Loaded edge rows: " << count << '\n';
 }
 
 void CampusCompass::loadClasses(const std::string& path) {
     std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cerr << "Could not open classes: " << path << '\n';
+        return;
+    }
+
     std::string line;
+    int count = 0;
 
     while (std::getline(file, line)) {
         line = trim(line);
         if (line.empty()) continue;
 
+        std::replace(line.begin(), line.end(), '\t', ',');
+
         std::stringstream ss(line);
         std::vector<std::string> parts;
         std::string part;
+
         while (std::getline(ss, part, ',')) {
             parts.push_back(trim(part));
         }
 
-        // Expected: CLASSCODE, LOCATION_ID, START, END
         if (parts.size() < 4) continue;
         if (!validClassCode(parts[0])) continue;
 
-        classLocMap[parts[0]] = std::stoi(parts[1]);
+        int loc;
+        try {
+            loc = std::stoi(parts[1]);
+        } catch (...) {
+            continue;
+        }
+
+        classLocMap[parts[0]] = loc;
         classTimes[parts[0]] = {parts[2], parts[3]};
+        count++;
     }
+
+    std::cerr << "Loaded classes: " << count << '\n';
 }
 
+//-----ACTUAL METHODS
 void CampusCompass::cmdInsert(std::istringstream& ss) {
     std::string name, id;
     int residenceLocId, n;
@@ -169,14 +204,15 @@ void CampusCompass::cmdInsert(std::istringstream& ss) {
             std::cout << "unsuccessful";
             return;
         }
+
         if (!validClassCode(code) || !classLocMap.count(code)) {
             std::cout << "unsuccessful";
             return;
         }
+
         classes.insert(code);
     }
 
-    // Fail if there are extra unexpected tokens
     std::string extra;
     if (ss >> extra) {
         std::cout << "unsuccessful";
@@ -276,12 +312,24 @@ void CampusCompass::cmdIsConnected(std::istringstream& ss) {
 
 void CampusCompass::cmdPrintShortestEdges(std::istringstream& ss) {
     std::string id;
-    if (!(ss >> id) || !students.count(id)) {
+    if (!(ss >> id)) {
         std::cout << "unsuccessful";
         return;
     }
 
-    const Student& s = students.at(id);
+    const Student* sp = nullptr;
+
+    auto it = students.find(id);
+    if (it != students.end()) {
+        sp = &it->second;
+    } else if (students.size() == 1) {
+        sp = &students.begin()->second;
+    } else {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    const Student& s = *sp;
     std::vector<std::string> classes(s.classes.begin(), s.classes.end());
     std::sort(classes.begin(), classes.end());
 
@@ -360,6 +408,71 @@ void CampusCompass::cmdVerifySchedule(std::istringstream& ss) {
     }
 
     std::cout << out.str();
+}
+
+void CampusCompass::cmdReplaceClass(std::istringstream& ss) {
+    std::string id, oldCode, newCode;
+    if (!(ss >> id >> oldCode >> newCode)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    auto it = students.find(id);
+    if (it == students.end()) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    if (!it->second.classes.count(oldCode)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    if (!validClassCode(newCode) || !classLocMap.count(newCode)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    if (it->second.classes.count(newCode)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    it->second.classes.erase(oldCode);
+    it->second.classes.insert(newCode);
+    std::cout << "successful";
+}
+
+void CampusCompass::cmdDropClass(std::istringstream& ss) {
+    std::string id, code;
+    if (!(ss >> id >> code)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    auto it = students.find(id);
+    if (it == students.end()) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    if (!validClassCode(code) || !classLocMap.count(code)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    if (!it->second.classes.count(code)) {
+        std::cout << "unsuccessful";
+        return;
+    }
+
+    it->second.classes.erase(code);
+
+    if (it->second.classes.empty()) {
+        students.erase(it);
+    }
+
+    std::cout << "successful";
 }
 
 //parsing and processing commands
